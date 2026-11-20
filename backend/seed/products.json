@@ -1,0 +1,179 @@
+[
+  {
+    "id": "prod-1",
+    "name": "Nexora Titan X Pro 5G",
+    "category": "Smartphones",
+    "price": 1199,
+    "originalPrice": 1299,
+    "rating": 4.9,
+    "reviewsCount": 342,
+    "inStock": true,
+    "stockCount": 45,
+    "featured": true,
+    "trending": true,
+    "image": "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=800&q=80",
+    "description": "Flagship smartphone featuring the Quantum Bionic 4nm processor, Ceramic Shield glass, and a cinematic 108MP triple lens system.",
+    "specs": {
+      "Display": "6.8\" Dynamic AMOLED 120Hz",
+      "Processor": "Quantum Bionic Octa-Core",
+      "Camera": "108MP Main + 48MP Telephoto + 12MP Ultra-wide",
+      "Battery": "5,000 mAh (65W Fast Charge)",
+      "Storage": "512GB NVMe / 12GB LPDDR5"
+    }
+  },
+  {
+    "id": "prod-2",
+    "name": "Nexora Blade 16 Ultra Studio",
+    "category": "Laptops",
+    "price": 2499,
+    "originalPrice": 2699,
+    "rating": 4.8,
+    "reviewsCount": 189,
+    "inStock": true,
+    "stockCount": 22,
+    "featured": true,
+    "trending": true,
+    "image": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80",
+    "description": "Engineered for creators and engineers. CNC anodized aluminum chassis housing a 16-core workstation chip and studio-grade liquid retina XDR screen.",
+    "specs": {
+      "Display": "16.2\" Liquid Retina XDR (3456 x 2234)",
+      "CPU": "Nexora Tensor M-Max 16-Core",
+      "RAM": "32GB Unified Memory",
+      "Storage": "1TB PCIe Gen4 SSD",
+      "Weight": "1.98 kg"
+    }
+  },
+  {
+    "id": "prod-3",
+    "name": "Nexora Acoustic Pro Wireless ANC",
+    "category": "Headphones",
+    "price": 349,
+    "originalPrice": 399,
+    "rating": 4.7,
+    "reviewsCount": 512,
+    "inStock": true,
+    "stockCount": 78,
+    "featured": true,
+    "trending": false,
+    "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80",
+    "description": "Studio-grade lossless wireless acoustics with adaptive hybrid Active Noise Cancellation and spatial audio head tracking.",
+    "specs": {
+      "Drivers": "40mm Beryllium Custom Drivers",
+      "Battery Life": "40 hours with ANC active",
+      "Connectivity": "Bluetooth 5.3 + Lossless USB-C Audio",
+      "Latency": "< 30ms Ultra Low Latency Mode",
+      "Weight": "260g"
+    }
+  },
+  {
+    "id": "prod-4",
+    "name": "Nexora Chronos Horizon Smartwatch",
+    "category": "Smartwatches",
+    "price": 429,
+    "originalPrice": 479,
+    "rating": 4.9,
+    "reviewsCount": 280,
+    "inStock": true,
+    "stockCount": 30,
+    "featured": true,
+    "trending": true,
+    "image": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80",
+    "description": "Aerospace-grade titanium chassis with sapphire crystal glass. Real-time ECG, optical SpO2, and dual-frequency GPS navigation.",
+    "specs": {
+      "Case": "46mm Grade-5 Titanium",
+      "Screen": "1.43\" Sapphire Sapphire AMOLED",
+      "Sensors": "BioActive 4.0 ECG + Blood Oxygen + Temp",
+      "Water Resistance": "10 ATM (100 meters)",
+      "Battery": "Up to 7 days normal usage"
+    }
+  },
+  {
+    "id": "prod-5",
+    "name": "Nexora CyberStrike 75% Mechanical Keyboard",
+    "category": "Gaming accessories",
+    "price": 189,
+    "originalPrice": 219,
+    "rating": 4.8,
+    "reviewsCount": 410,
+    "inStock": true,
+    "stockCount": 55,
+    "featured": false,
+    "trending": true,
+    "image": "https://images.unsplash.com/photo-1595225476474-87563907a212?auto=format&fit=crop&w=800&q=80",
+    "description": "Gasket-mounted hot-swappable mechanical keyboard with factory-lubed magnetic Hall effect switches and per-key RGB backlighting.",
+    "specs": {
+      "Switches": "Nexora Magnetic Linear Switches (Rapid Trigger)",
+      "Keycaps": "Double-shot PBT Cherry Profile",
+      "Polling Rate": "8,000Hz Hyper-Polling",
+      "Connection": "Tri-mode (2.4GHz / Bluetooth 5.2 / Type-C)",
+      "Structure": "Aluminum Top Case + Poron Gasket"
+    }
+  },
+  {
+    "id": "prod-6",
+    "name": "Nexora Apex Wireless Gaming Mouse",
+    "category": "Gaming accessories",
+    "price": 129,
+    "originalPrice": 149,
+    "rating": 4.7,
+    "reviewsCount": 305,
+    "inStock": true,
+    "stockCount": 60,
+    "featured": false,
+    "trending": false,
+    "image": "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80",
+    "description": "Ultra-lightweight 49g esports gaming mouse equipped with a 30,000 DPI optical sensor and optical micro-switches rated for 90 million clicks.",
+    "specs": {
+      "Sensor": "FocusPro 30K Optical Sensor",
+      "Weight": "49 grams featherlight",
+      "Battery": "90 Hours continuous wireless",
+      "Max DPI": "30,000 DPI with 750 IPS",
+      "Polling Rate": "4000Hz Wireless Dongle included"
+    }
+  },
+  {
+    "id": "prod-7",
+    "name": "Nexora Edge Fold 5G",
+    "category": "Smartphones",
+    "price": 1799,
+    "originalPrice": 1899,
+    "rating": 4.6,
+    "reviewsCount": 144,
+    "inStock": true,
+    "stockCount": 18,
+    "featured": true,
+    "trending": false,
+    "image": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80",
+    "description": "Zero-crease foldable smartphone that opens into a continuous 7.6-inch tablet display with under-display camera technology.",
+    "specs": {
+      "Main Display": "7.6\" Foldable OLED 120Hz HDR10+",
+      "Cover Screen": "6.2\" Exterior Super AMOLED",
+      "RAM": "16GB RAM + 512GB Storage",
+      "Hinge": "Titanium alloy gearless hinge",
+      "Battery": "4,400 mAh dual-cell"
+    }
+  },
+  {
+    "id": "prod-8",
+    "name": "Nexora AirBook Studio 14",
+    "category": "Laptops",
+    "price": 1699,
+    "originalPrice": 1799,
+    "rating": 4.9,
+    "reviewsCount": 220,
+    "inStock": true,
+    "stockCount": 35,
+    "featured": false,
+    "trending": true,
+    "image": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=800&q=80",
+    "description": "Featherlight 1.1kg laptop with up to 22 hours of battery life and fanless whisper-quiet architecture.",
+    "specs": {
+      "Display": "14.2\" OLED 2.8K 90Hz",
+      "CPU": "Nexora Neural Core i7-Evo",
+      "RAM": "16GB LPDDR5X",
+      "Storage": "512GB Gen4 SSD",
+      "Battery Life": "Up to 22 Hours"
+    }
+  }
+]
+

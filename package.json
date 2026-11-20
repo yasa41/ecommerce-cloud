@@ -1,0 +1,21 @@
+{
+  "name": "nexora-cloud-ecommerce",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NEXORA – Modern E-Commerce Platform with Simulated Cloud Infrastructure",
+  "scripts": {
+    "install:all": "npm install --prefix frontend && npm install --prefix backend && npm install --prefix infrastructure",
+    "start:infra": "node infrastructure/loadBalancer.js",
+    "start:backend": "node backend/server.js",
+    "start:frontend": "npm run dev --prefix frontend",
+    "start": "node run-all.js"
+  },
+  "keywords": [
+    "cloud-computing",
+    "load-balancer",
+    "auto-scaling",
+    "microservices",
+    "ecommerce"
+  ],
+  "author": "NEXORA Systems"
+}
