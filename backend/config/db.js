@@ -8,7 +8,7 @@ const STORE_FILE = path.join(__dirname, '..', 'data_store.json');
 let isMongoConnected = false;
 let dbStatus = 'Initializing';
 
-// In-file store helpers for resilience
+// In-file store helpers for resilience when MongoDB daemon is not running
 function loadFallbackStore() {
   try {
     if (!fs.existsSync(STORE_FILE)) {
@@ -41,17 +41,22 @@ async function connectDB(mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.
   try {
     mongoose.set('strictQuery', false);
     await mongoose.connect(mongoUri, {
-      serverSelectionTimeoutMS: 2000
+      serverSelectionTimeoutMS: 2500
     });
     isMongoConnected = true;
-    dbStatus = 'Connected to MongoDB (27017)';
-    console.log(`[Database] Connected successfully to MongoDB: ${mongoUri}`);
+    dbStatus = 'Connected to Local MongoDB (Port 27017)';
+    console.log(`\n================================================================`);
+    console.log(`>>> [Database] Connected successfully to MONGODB!`);
+    console.log(`>>> Connection URI: ${mongoUri}`);
+    console.log(`>>> Database Name: nexora`);
+    console.log(`================================================================\n`);
     await seedMongoIfEmpty();
   } catch (err) {
     isMongoConnected = false;
-    dbStatus = 'Fallback JSON Database Active';
-    console.warn(`[Database] MongoDB not reachable (${err.message}). Using shared persistent JSON store.`);
-    loadFallbackStore(); // ensure file exists
+    dbStatus = 'Fallback Local Persistent Store Active';
+    console.warn(`\n[Database] Local MongoDB daemon on 27017 was not reached (${err.message}).`);
+    console.warn(`[Database] Using shared persistent storage (orders and products saved to backend/data_store.json).`);
+    loadFallbackStore();
   }
 }
 
@@ -64,7 +69,9 @@ async function seedMongoIfEmpty() {
     if (count === 0) {
       const seedProducts = JSON.parse(fs.readFileSync(SEED_FILE, 'utf-8'));
       await Product.insertMany(seedProducts);
-      console.log(`[Database] Seeded ${seedProducts.length} electronics products into MongoDB.`);
+      console.log(`>>> [MongoDB] Seeded ${seedProducts.length} electronics products into collection 'products'!`);
+    } else {
+      console.log(`>>> [MongoDB] Collection 'products' verified with ${count} existing items.`);
     }
   } catch (err) {
     console.error('[Database] Failed to seed MongoDB:', err);
@@ -78,4 +85,3 @@ module.exports = {
   loadFallbackStore,
   saveFallbackStore
 };
-

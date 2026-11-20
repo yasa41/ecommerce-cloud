@@ -20,8 +20,9 @@ import {
   Globe
 } from 'lucide-react';
 import { 
-  AreaChart, 
+  ComposedChart,
   Area, 
+  Line,
   XAxis, 
   YAxis, 
   CartesianGrid, 
@@ -29,7 +30,8 @@ import {
   ResponsiveContainer, 
   BarChart, 
   Bar, 
-  Cell
+  Cell,
+  Legend
 } from 'recharts';
 import { useCloud } from '../context/CloudContext';
 
@@ -52,13 +54,16 @@ export const CloudDashboardPage = () => {
   const cloudRegion = metrics.cloud?.region || 'us-central1';
 
   // Chart data for instance distribution
-  const instanceDistributionData = (metrics.activeInstances || []).map((inst, index) => ({
-    name: inst.id,
-    port: inst.port,
-    requests: inst.requestsHandled || 0,
-    status: inst.status,
-    color: ['#4285F4', '#34A853', '#FBBC05', '#EA4335'][index % 4] // Google Cloud primary colors
-  }));
+  const instanceDistributionData = (metrics.activeInstances || []).map((inst, index) => {
+    const isFailing = inst.status === 'failing';
+    return {
+      name: isFailing ? `${inst.id} [OFFLINE]` : inst.id,
+      port: inst.port,
+      requests: inst.requestsHandled || 0,
+      status: inst.status,
+      color: isFailing ? '#EF4444' : ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B'][index % 4]
+    };
+  });
 
   return (
     <div className="bg-slate-950 min-h-screen text-slate-100 p-4 sm:p-6 lg:p-8 space-y-8 font-sans">
@@ -287,22 +292,51 @@ export const CloudDashboardPage = () => {
 
             <div className="flex items-center gap-2 mt-3 pt-2 border-t border-slate-800">
               <button
-                onClick={() => failServer(metrics.lastServedInstance)}
+                onClick={() => failServer('backend-2')}
                 className="flex-1 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 rounded-lg text-[10px] font-bold font-mono transition-colors"
               >
-                Degrade Health
+                Fail Node #2
               </button>
               <button
-                onClick={() => restoreServer(metrics.lastServedInstance)}
+                onClick={() => restoreServer('backend-2')}
                 className="flex-1 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 rounded-lg text-[10px] font-bold font-mono transition-colors"
               >
-                Restore Health
+                Restore Node #2
               </button>
             </div>
           </div>
 
         </div>
       </div>
+
+      {/* Dynamic Health & Failover Status Banner */}
+      {metrics.activeInstances?.some(i => i.status === 'failing') ? (
+        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-rose-300 animate-pulse">
+          <div className="flex items-center gap-3">
+            <div className="w-3.5 h-3.5 rounded-full bg-rose-500 animate-ping flex-shrink-0"></div>
+            <div>
+              <span className="font-bold text-sm text-white">CRITICAL FAILOVER ACTIVE: Node #2 is OFFLINE (503)</span>
+              <p className="text-xs text-rose-400 mt-0.5">
+                Load Balancer has isolated Node #2. 100% of incoming requests are redirected to Node #1 with zero user downtime.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => restoreServer('backend-2')}
+            className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl shadow-md transition-all whitespace-nowrap"
+          >
+            Restore Node #2
+          </button>
+        </div>
+      ) : (
+        <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between text-emerald-300 text-xs font-mono">
+          <span className="flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            High Availability Status: All {metrics.activeCount || 2} Nodes Healthy • Round-Robin Traffic Balanced 50/50
+          </span>
+          <span className="hidden sm:inline text-slate-400 text-[11px]">Zero Dropped Packets</span>
+        </div>
+      )}
 
       {/* Cloud Run Container Instances Grid */}
       <div className="space-y-4">
@@ -400,29 +434,43 @@ export const CloudDashboardPage = () => {
 
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={metrics.history || []}>
+              <ComposedChart data={metrics.history || []}>
                 <defs>
                   <linearGradient id="colorGcpRps" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#4285F4" stopOpacity={0.4}/>
-                    <stop offset="95%" stopColor="#4285F4" stopOpacity={0.0}/>
+                    <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.45}/>
+                    <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.0}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                 <XAxis dataKey="time" stroke="#64748b" fontSize={11} fontStyle="mono" />
-                <YAxis stroke="#64748b" fontSize={11} fontStyle="mono" />
+                <YAxis yAxisId="left" stroke="#3B82F6" fontSize={11} fontStyle="mono" label={{ value: 'RPS', angle: -90, position: 'insideLeft', fill: '#3B82F6', fontSize: 10 }} />
+                <YAxis yAxisId="right" orientation="right" stroke="#10B981" fontSize={11} fontStyle="mono" domain={[0, 4]} ticks={[0, 1, 2, 3, 4]} label={{ value: 'Nodes', angle: 90, position: 'insideRight', fill: '#10B981', fontSize: 10 }} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '0.75rem', fontSize: '12px' }}
-                  itemStyle={{ color: '#4285F4' }}
                 />
                 <Area 
+                  yAxisId="left"
                   type="monotone" 
                   dataKey="rps" 
-                  stroke="#4285F4" 
-                  strokeWidth={2}
+                  name="Traffic (RPS)"
+                  stroke="#3B82F6" 
+                  strokeWidth={2.5}
                   fillOpacity={1} 
                   fill="url(#colorGcpRps)" 
                 />
-              </AreaChart>
+                <Line 
+                  yAxisId="right"
+                  type="stepAfter" 
+                  dataKey="instances" 
+                  name="Healthy Online Nodes (0-4)"
+                  stroke="#10B981" 
+                  strokeWidth={3.5} 
+                  dot={{ r: 5, fill: '#10B981', stroke: '#0f172a', strokeWidth: 2 }}
+                />
+                <Legend 
+                  wrapperStyle={{ paddingTop: '8px', fontSize: '11px', fontFamily: 'monospace' }}
+                />
+              </ComposedChart>
             </ResponsiveContainer>
           </div>
         </div>

@@ -16,6 +16,7 @@ exports.createOrder = async (req, res) => {
     if (isMongoConnected()) {
       const doc = new Order(newOrder);
       await doc.save();
+      console.log(`\n>>> [MongoDB] Order ${orderId} saved to database 'nexora' in collection 'orders'! (Total: $${newOrder.total})`);
       return res.status(201).json({ success: true, order: doc });
     }
 
@@ -24,8 +25,10 @@ exports.createOrder = async (req, res) => {
     store.orders.unshift(newOrder);
     saveFallbackStore(store);
 
+    console.log(`\n>>> [Storage] Order ${orderId} saved to shared store! (Total: $${newOrder.total})`);
     return res.status(201).json({ success: true, order: newOrder });
   } catch (err) {
+    console.error('Error creating order:', err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -43,4 +46,3 @@ exports.getOrders = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-

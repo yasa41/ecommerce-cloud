@@ -4,7 +4,8 @@
   "private": true,
   "description": "NEXORA – Modern E-Commerce Platform with Simulated Cloud Infrastructure",
   "scripts": {
-    "install:all": "npm install --prefix frontend && npm install --prefix backend && npm install --prefix infrastructure",
+    "install:all": "npm install --prefix frontend && npm install --prefix backend",
+    "mongo": "mongod --dbpath database/data --port 27017",
     "start:infra": "node infrastructure/loadBalancer.js",
     "start:backend": "node backend/server.js",
     "start:frontend": "npm run dev --prefix frontend",
@@ -15,7 +16,8 @@
     "load-balancer",
     "auto-scaling",
     "microservices",
-    "ecommerce"
+    "ecommerce",
+    "mongodb"
   ],
   "author": "NEXORA Systems"
 }

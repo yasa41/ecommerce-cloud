@@ -5,41 +5,41 @@ const CloudContext = createContext();
 export const CloudProvider = ({ children }) => {
   const [metrics, setMetrics] = useState({
     activeInstances: [
-      { id: 'cloud-run-primary', port: 8080, status: 'healthy', requestsHandled: 0, cpuUsage: '12%', memoryUsage: '48 MB' }
+      { id: 'backend-1', port: 5001, status: 'healthy', requestsHandled: 14, cpuUsage: '14%', memoryUsage: '48 MB' },
+      { id: 'backend-2', port: 5002, status: 'healthy', requestsHandled: 10, cpuUsage: '11%', memoryUsage: '45 MB' }
     ],
-    activeCount: 1,
-    minInstances: 1,
+    activeCount: 2,
+    minInstances: 2,
     maxInstances: 4,
-    totalRequests: 0,
-    currentRps: 1.2,
-    mongoStatus: 'Connected',
-    mongoHost: 'MongoDB / Google Cloud',
+    totalRequests: 24,
+    currentRps: 1.4,
+    mongoStatus: 'Connected to Local MongoDB (Port 27017)',
     cloud: {
-      provider: 'Google Cloud Platform (GCP)',
-      service: 'Google Cloud Run',
-      region: 'us-central1',
-      projectId: 'nexora-gcp',
-      revision: 'nexora-v1',
+      provider: 'NEXORA Cloud Cluster',
+      service: 'Round-Robin Multi-Instance Cluster',
+      region: 'local / us-central1',
+      projectId: 'nexora-demo',
+      revision: 'v1.0.0',
       isGcp: false,
       consoleUrl: 'https://console.cloud.google.com/run'
     },
     scalingEvents: [
-      { id: 1, timestamp: new Date().toLocaleTimeString(), type: 'INFO', message: 'NEXORA connected to Google Cloud infrastructure.' }
+      { id: 1, timestamp: new Date().toLocaleTimeString(), type: 'INFO', message: 'NEXORA cluster initialized with 2 baseline instances (:5001, :5002).' }
     ],
     history: [
-      { time: '00:00', rps: 1, instances: 1 },
-      { time: '00:05', rps: 2, instances: 1 },
-      { time: '00:10', rps: 1, instances: 1 },
-      { time: '00:15', rps: 2, instances: 1 }
+      { time: '00:00', rps: 1.2, instances: 2 },
+      { time: '00:02', rps: 1.5, instances: 2 },
+      { time: '00:04', rps: 1.3, instances: 2 },
+      { time: '00:06', rps: 1.4, instances: 2 }
     ],
-    lastServedInstance: 'cloud-run-primary',
+    lastServedInstance: 'backend-1',
     lastResponseTime: '12ms'
   });
 
   const [simulationMode, setSimulationMode] = useState('normal'); // 'normal' | 'surge' | 'low'
   const [isLiveConnected, setIsLiveConnected] = useState(false);
 
-  // Poll metrics from backend
+  // Poll metrics from backend every 2 seconds
   const fetchMetrics = useCallback(async () => {
     try {
       const res = await fetch('/api/infra/metrics');
@@ -48,11 +48,7 @@ export const CloudProvider = ({ children }) => {
         setMetrics(prev => ({
           ...prev,
           ...data,
-          cloud: {
-            ...prev.cloud,
-            ...(data.cloud || {})
-          },
-          history: data.history && data.history.length > 0 ? data.history : prev.history
+          history: Array.isArray(data.history) && data.history.length > 0 ? data.history : prev.history
         }));
         setIsLiveConnected(true);
       }
@@ -63,12 +59,12 @@ export const CloudProvider = ({ children }) => {
 
   useEffect(() => {
     fetchMetrics();
-    const interval = setInterval(fetchMetrics, 2500);
+    const interval = setInterval(fetchMetrics, 2000);
     return () => clearInterval(interval);
   }, [fetchMetrics]);
 
   // Record instance header whenever an API request completes
-  const recordApiCall = (instanceId, responseTime) => {
+  const recordApiCall = useCallback((instanceId, responseTime) => {
     if (instanceId) {
       setMetrics(prev => {
         const existingInst = prev.activeInstances.find(i => i.id === instanceId);
@@ -78,10 +74,9 @@ export const CloudProvider = ({ children }) => {
             inst.id === instanceId ? { ...inst, requestsHandled: inst.requestsHandled + 1, status: 'healthy' } : inst
           );
         } else {
-          // Discovered a new container instance spawned by Google Cloud Run!
           updatedInstances = [
             ...prev.activeInstances,
-            { id: instanceId, port: 8080, status: 'healthy', requestsHandled: 1, cpuUsage: '18%', memoryUsage: '45 MB' }
+            { id: instanceId, port: 5000, status: 'healthy', requestsHandled: 1, cpuUsage: '12%', memoryUsage: '45 MB' }
           ];
         }
 
@@ -95,34 +90,23 @@ export const CloudProvider = ({ children }) => {
         };
       });
     }
-  };
+  }, []);
 
-  // Generate real concurrent HTTP load to test Google Cloud Run autoscaling
+  // Simulation controls that trigger real server updates and live graph changes
   const triggerTrafficSurge = async () => {
     setSimulationMode('surge');
-    setMetrics(prev => ({
-      ...prev,
-      scalingEvents: [
-        {
-          id: Date.now(),
-          timestamp: new Date().toLocaleTimeString(),
-          type: 'SCALE_UP',
-          message: 'Firing 25 concurrent requests to trigger Google Cloud Run autoscaler...'
-        },
-        ...prev.scalingEvents
-      ]
-    }));
+    try {
+      await fetch('/api/infra/simulate-traffic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rate: 'high' })
+      });
+    } catch {}
 
-    // Fire 25 concurrent requests to generate real traffic for GCP Cloud Run
-    const requests = Array.from({ length: 25 }, () =>
-      fetch('/api/products?t=' + Math.random())
-        .then(res => {
-          const instId = res.headers.get('x-backend-instance');
-          if (instId) recordApiCall(instId, '15ms');
-        })
-        .catch(() => {})
+    // Send rapid burst to drive live load
+    const requests = Array.from({ length: 15 }, () =>
+      fetch('/api/products?burst=' + Math.random()).catch(() => {})
     );
-
     await Promise.all(requests);
     fetchMetrics();
   };
@@ -136,20 +120,7 @@ export const CloudProvider = ({ children }) => {
         body: JSON.stringify({ rate: 'normal' })
       });
     } catch {}
-
-    setMetrics(prev => ({
-      ...prev,
-      currentRps: 1.5,
-      scalingEvents: [
-        {
-          id: Date.now(),
-          timestamp: new Date().toLocaleTimeString(),
-          type: 'SCALE_DOWN',
-          message: 'Traffic normalized. Cloud Run maintains baseline instances.'
-        },
-        ...prev.scalingEvents
-      ]
-    }));
+    setTimeout(fetchMetrics, 300);
   };
 
   const triggerLowTraffic = async () => {
@@ -161,63 +132,31 @@ export const CloudProvider = ({ children }) => {
         body: JSON.stringify({ rate: 'low' })
       });
     } catch {}
-
-    setMetrics(prev => ({
-      ...prev,
-      currentRps: 0.5
-    }));
+    setTimeout(fetchMetrics, 300);
   };
 
   const failServer = async (instanceId) => {
+    const target = instanceId || 'backend-2';
     try {
       await fetch('/api/infra/fail-instance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ instanceId })
+        body: JSON.stringify({ instanceId: target })
       });
     } catch {}
-
-    setMetrics(prev => ({
-      ...prev,
-      activeInstances: prev.activeInstances.map(inst =>
-        inst.id === instanceId ? { ...inst, status: 'failing' } : inst
-      ),
-      scalingEvents: [
-        {
-          id: Date.now(),
-          timestamp: new Date().toLocaleTimeString(),
-          type: 'ALERT',
-          message: `Simulated outage on ${instanceId}. Google Cloud load balancer reroutes traffic.`
-        },
-        ...prev.scalingEvents
-      ]
-    }));
+    setTimeout(fetchMetrics, 300);
   };
 
   const restoreServer = async (instanceId) => {
+    const target = instanceId || 'backend-2';
     try {
       await fetch('/api/infra/restore-instance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ instanceId })
+        body: JSON.stringify({ instanceId: target })
       });
     } catch {}
-
-    setMetrics(prev => ({
-      ...prev,
-      activeInstances: prev.activeInstances.map(inst =>
-        inst.id === instanceId ? { ...inst, status: 'healthy' } : inst
-      ),
-      scalingEvents: [
-        {
-          id: Date.now(),
-          timestamp: new Date().toLocaleTimeString(),
-          type: 'INFO',
-          message: `Container ${instanceId} restored to healthy status.`
-        },
-        ...prev.scalingEvents
-      ]
-    }));
+    setTimeout(fetchMetrics, 300);
   };
 
   return (

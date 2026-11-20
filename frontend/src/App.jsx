@@ -28,14 +28,16 @@ function AppContent() {
     registerHeaderCallback((instanceId, responseTime) => {
       recordApiCall(instanceId, responseTime);
     });
+  }, [recordApiCall]);
 
-    // Initial load from backend (or fallback)
+  // Initial products fetch on mount
+  useEffect(() => {
     api.getProducts().then(data => {
       if (data && data.length > 0) {
         setProducts(data);
       }
     });
-  }, [recordApiCall]);
+  }, []);
 
   const handleSelectProduct = (product) => {
     setSelectedProduct(product);
